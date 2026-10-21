@@ -3,8 +3,6 @@
 Laravel 13 / PHP 8.4 / PostgreSQL 17, Blade, database queue/cache, nginx, Prometheus и Grafana. Класира градове по измерена PM2.5 с проверки за покритие. Само реални измервания в работните бази; synthetic данните са ограничени до тестове и отделна benchmark база.
 
 ## Стартиране
-docker compose --profile monitoring up -d --build
-
 
 ```sh
 При операционна система Линукс може да стартирате: 
