@@ -5,7 +5,6 @@ Laravel 13 / PHP 8.4 / PostgreSQL 17, Blade, database queue/cache, nginx, Promet
 ## Стартиране
 docker compose --profile monitoring up -d --build
 
-On Windows, double-click [start.bat](start.bat). It starts Docker Compose, waits for the application health endpoint, and opens the configured `APP_URL` in your browser. You can also run `scripts\\start.ps1` from PowerShell.
 
 ```sh
 ./scripts/start
