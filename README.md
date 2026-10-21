@@ -7,7 +7,12 @@ docker compose --profile monitoring up -d --build
 
 
 ```sh
+For Linux:
 ./scripts/start
+
+For Windows:
+powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1
+
 # http://localhost:8080
 # Първоначално реално събиране:
 docker compose exec app php artisan air:collect
