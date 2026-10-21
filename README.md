@@ -7,10 +7,17 @@ docker compose --profile monitoring up -d --build
 
 
 ```sh
+При операционна система Линукс може да стартирате: 
 ./scripts/start
+
+При Уиндоус в папката на  проекта:
+./scripts/start.ps1
+
 # http://localhost:8080
+
 # Първоначално реално събиране:
 docker compose exec app php artisan air:collect
+
 # Последните 12 завършени месеца, фоново:
 docker compose exec app php artisan air:backfill --months=12 --queue
 ```
