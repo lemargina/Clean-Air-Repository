@@ -15,7 +15,7 @@ docker compose exec app php artisan air:collect
 docker compose exec app php artisan air:backfill --months=12 --queue
 ```
 
-`start` генерира локални тайни в `.env.docker`, изгражда образа, стартира PostgreSQL, изпълнява миграциите и географския импорт, web, scheduler, worker и monitoring. Не стартира многогигабайтовия исторически импорт автоматично. Може да се търси, когато реалните данни имат достатъчно валидни часове/дни. Празна инсталация няма победител. Мониторинг: http://localhost:9090 и http://localhost:3000; Grafana admin паролата е в `.env.docker`.
+`start` генерира локални тайни в `.env.docker`, изгражда image, стартира PostgreSQL, изпълнява миграциите и географския импорт, web, scheduler, worker и monitoring. Не стартира многогигабайтовия исторически импорт автоматично. Може да се търси, когато реалните данни имат достатъчно валидни часове/дни. Празна инсталация няма победител. Мониторинг: http://localhost:9090 и http://localhost:3000; Grafana admin паролата е в `.env.docker`.
 
 Пълен backfill е продължителна операция и **не е завършен в тази локална доставка**. Не приемайте диагностичната извадка за национално покритие. Вижте [финалния доклад](docs/FINAL-REPORT.md), [източниците](docs/DATA-SOURCES.md) и [операциите](docs/OPERATIONS.md).
 
