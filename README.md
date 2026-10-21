@@ -3,8 +3,6 @@
 Laravel 13 / PHP 8.4 / PostgreSQL 17, Blade, database queue/cache, nginx, Prometheus и Grafana. Класира градове по измерена PM2.5 с проверки за покритие. Само реални измервания в работните бази; synthetic данните са ограничени до тестове и отделна benchmark база.
 
 ## Стартиране
-docker compose --profile monitoring up -d --build
-
 
 ```sh
 For Linux:
@@ -14,8 +12,10 @@ For Windows:
 powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1
 
 # http://localhost:8080
+
 # Първоначално реално събиране:
 docker compose exec app php artisan air:collect
+
 # Последните 12 завършени месеца, фоново:
 docker compose exec app php artisan air:backfill --months=12 --queue
 ```
