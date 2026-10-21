@@ -1,0 +1,91 @@
+{
+  "liveness": {
+    "status": "alive"
+  },
+  "readiness": {
+    "status": "ready",
+    "data_state": "fresh",
+    "coverage": {
+      "from": "2026-10-18",
+      "to": "2026-10-20",
+      "measurements": 3369,
+      "last_measurement_at": "2026-10-20 09:14:01+00",
+      "qualified_from": "2026-10-18",
+      "qualified_to": "2026-10-19",
+      "qualified_days": 2,
+      "last_successful_sync": "2026-10-20 09:15:04+00",
+      "stale": false,
+      "pending_aggregation_days": 0,
+      "historical_import": {
+        "completed_full_months": [],
+        "consecutive_full_months": 0,
+        "has_twelve_completed_months": false,
+        "period_from": null,
+        "period_to": null,
+        "qualified_days_in_period": 0,
+        "expected_days_in_period": 0,
+        "verified_twelve_month_history": false
+      },
+      "imports": [],
+      "source": "Sensor.Community — Database Contents License 1.0; attribution: https://sensor.community/"
+    }
+  },
+  "coverage": {
+    "from": "2026-10-18",
+    "to": "2026-10-20",
+    "measurements": 3369,
+    "last_measurement_at": "2026-10-20 09:14:01+00",
+    "qualified_from": "2026-10-18",
+    "qualified_to": "2026-10-19",
+    "qualified_days": 2,
+    "last_successful_sync": "2026-10-20 09:15:04+00",
+    "stale": false,
+    "pending_aggregation_days": 0,
+    "historical_import": {
+      "completed_full_months": [],
+      "consecutive_full_months": 0,
+      "has_twelve_completed_months": false,
+      "period_from": null,
+      "period_to": null,
+      "qualified_days_in_period": 0,
+      "expected_days_in_period": 0,
+      "verified_twelve_month_history": false
+    },
+    "imports": [],
+    "source": "Sensor.Community — Database Contents License 1.0; attribution: https://sensor.community/"
+  },
+  "cities": 257,
+  "metrics_verified": true,
+  "real_data_query": {
+    "path": "/api/v1/air-quality/cleanest?from=2026-10-18&to=2026-10-19",
+    "status": "ok",
+    "winners": [
+      {
+        "city_id": 221,
+        "city": "Бургас",
+        "pm25": 1.564,
+        "pm10": 4.462,
+        "pm10_days": 2,
+        "sensors": 1,
+        "days_covered": 2,
+        "period_days": 2,
+        "coverage_percent": 100,
+        "rank": 1
+      }
+    ],
+    "eligible_cities": 1,
+    "excluded_cities": 256
+  },
+  "partial_history_warning": true,
+  "prometheus_targets": [
+    {
+      "health": "up",
+      "error": ""
+    }
+  ],
+  "grafana": {
+    "database": "ok",
+    "version": "12.2.0",
+    "commit": "92f1fba9b4b6700328e99e97328d6639df8ddc3d"
+  }
+}

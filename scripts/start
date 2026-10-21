@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+set -eu
+cd "$(dirname "$0")/.."
+if [ ! -f .env.docker ]; then
+ umask 077
+ appkey=$(openssl rand -base64 32)
+ dbpass=$(openssl rand -hex 24)
+ metricstoken=$(openssl rand -hex 24)
+ grafanapass=$(openssl rand -hex 18)
+ cat > .env.docker <<EOF
+APP_NAME="Clean Air Finder Bulgaria"
+APP_ENV=production
+APP_DEBUG=false
+APP_KEY=base64:$appkey
+APP_URL=http://localhost:8080
+DB_PASSWORD=$dbpass
+POSTGRES_PASSWORD=$dbpass
+METRICS_TOKEN=$metricstoken
+GF_SECURITY_ADMIN_PASSWORD=$grafanapass
+AIR_USER_AGENT="CleanAirFinderBulgaria/1.0 (set operator contact before public deployment)"
+EOF
+ printf '%s' "$metricstoken" > .metrics-token
+ # Prometheus container needs read access; token file is excluded from version control.
+ chmod 644 .metrics-token
+fi
+docker compose --profile monitoring up -d --build
+printf '\nApplication: http://localhost:8080\nGrafana credentials are in .env.docker\nInitialize data: docker compose exec app php artisan air:collect\nFull history: docker compose exec app php artisan air:backfill --months=12 --queue\n'

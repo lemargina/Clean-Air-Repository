@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-20",
+  "files": {
+    "city-geonames-ids.json": "80ff1a0e05bf8dfbe0f63c3ae4eeae14d2d4fe464e491e92fea7a77d3cc5a408",
+    "bulgaria.geojson": "80deb1c6a629cf31879aa796a86ee426a14ee75916640515daad3bb2da3afe94",
+    "cities.json": "f1d21942292be35f582cf91fe403e1604ab8369ae9139ae362d874599be16eee"
+  },
+  "cities_license": "GeoNames CC BY 4.0 \u2014 https://www.geonames.org/",
+  "boundary_license": "Natural Earth public domain \u2014 https://www.naturalearthdata.com/"
+}

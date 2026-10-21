@@ -1,0 +1,23 @@
+groups:
+ - name: clean-air
+   rules:
+    - alert: AirSourceStale
+      expr: time() - air_last_collection_timestamp > 3600 or time() - air_source_measurement_timestamp > 3600
+      for: 15m
+      labels: {severity: warning}
+      annotations: {summary: 'Air measurements or successful collection older than one hour'}
+    - alert: AirCollectionFailures
+      expr: increase(air_collection_failure_total[1h]) >= 3
+      for: 5m
+      labels: {severity: warning}
+      annotations: {summary: 'Three or more failed collection runs in one hour'}
+    - alert: AirInfrastructureUnavailable
+      expr: up{job="clean-air"} == 0 or air_database_up == 0
+      for: 2m
+      labels: {severity: critical}
+      annotations: {summary: 'Application metrics or PostgreSQL unavailable'}
+    - alert: AirQueueOrArchiveFailure
+      expr: air_queue_failures > 0 or increase(air_archive_errors_total[1h]) > 0
+      for: 5m
+      labels: {severity: warning}
+      annotations: {summary: 'Inspect failed jobs or archive integrity errors'}

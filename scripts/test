@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+set -eu
+cd "$(dirname "$0")/.."
+test_password=$(openssl rand -hex 20)
+test_container="clean-air-tests-$$"
+trap 'docker rm -f "$test_container" >/dev/null 2>&1 || true' EXIT INT TERM
+docker run -d --name "$test_container" -e POSTGRES_PASSWORD="$test_password" -e POSTGRES_USER=air -e POSTGRES_DB=air_test -p 127.0.0.1:55433:5432 postgres:17-alpine >/dev/null
+attempts=0
+while ! docker exec "$test_container" pg_isready -h 127.0.0.1 -U air -d air_test >/dev/null 2>&1; do
+ attempts=$((attempts + 1))
+ if [ "$attempts" -ge 60 ]; then docker logs "$test_container"; exit 1; fi
+ sleep 1
+done
+DB_CONNECTION=pgsql DB_HOST=127.0.0.1 DB_PORT=55433 DB_DATABASE=air_test DB_USERNAME=air DB_PASSWORD="$test_password" php artisan test "$@"

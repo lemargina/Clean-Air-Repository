@@ -1,0 +1,89 @@
+{
+  "100000": {
+    "raw_day": [
+      "Aggregate",
+      "Bitmap Heap Scan",
+      "Bitmap Index Scan [measurements_local_date_city_id_index]"
+    ],
+    "ranking": {
+      "1": [
+        "Aggregate",
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan [city_daily_statistics_date_city_id_unique]"
+      ],
+      "7": [
+        "Aggregate",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan [city_daily_statistics_date_city_id_unique]"
+      ],
+      "30": [
+        "Aggregate",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan [city_daily_statistics_date_city_id_unique]"
+      ],
+      "365": [
+        "Aggregate",
+        "Seq Scan"
+      ]
+    }
+  },
+  "1000000": {
+    "raw_day": [
+      "Aggregate",
+      "Bitmap Heap Scan",
+      "Bitmap Index Scan [measurements_local_date_city_id_index]"
+    ],
+    "ranking": {
+      "1": [
+        "Aggregate",
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan [city_daily_statistics_date_city_id_unique]"
+      ],
+      "7": [
+        "Aggregate",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan [city_daily_statistics_date_city_id_unique]"
+      ],
+      "30": [
+        "Aggregate",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan [city_daily_statistics_date_city_id_unique]"
+      ],
+      "365": [
+        "Aggregate",
+        "Seq Scan"
+      ]
+    }
+  },
+  "10000000": {
+    "raw_day": [
+      "Aggregate",
+      "Bitmap Heap Scan",
+      "Bitmap Index Scan [measurements_local_date_city_id_index]"
+    ],
+    "ranking": {
+      "1": [
+        "Aggregate",
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan [city_daily_statistics_date_city_id_unique]"
+      ],
+      "7": [
+        "Aggregate",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan [city_daily_statistics_date_city_id_unique]"
+      ],
+      "30": [
+        "Aggregate",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan [city_daily_statistics_date_city_id_unique]"
+      ],
+      "365": [
+        "Aggregate",
+        "Seq Scan"
+      ]
+    }
+  }
+}

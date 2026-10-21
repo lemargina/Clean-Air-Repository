@@ -1,0 +1,700 @@
+# CODEX TASK — Clean Air Finder Bulgaria
+
+## Role
+
+Act as a senior Laravel backend engineer, database architect, DevOps engineer and QA engineer.
+
+Build a complete, production-ready application called **Clean Air Finder Bulgaria**.
+
+Do not stop at architecture recommendations. Implement the application, database migrations, services, scheduled jobs, frontend, tests, documentation and deployment configuration.
+
+Use real publicly available environmental measurements. Do not use mock data in production.
+
+Work autonomously, but document important decisions and limitations.
+
+---
+
+# 1. Business requirements
+
+The application must answer:
+
+**Which Bulgarian city had the cleanest air during a selected historical period?**
+
+The user selects two dates using a calendar:
+
+- Date From
+- Date To
+
+After clicking **Find Cleanest Air**, the application must display:
+
+1. The Bulgarian city with the lowest average PM2.5 concentration.
+2. Average PM2.5 in µg/m³.
+3. Average PM10 in µg/m³ as supplementary information.
+4. Number of sensors contributing to the result.
+5. Number of valid measurement days.
+6. Data coverage percentage.
+7. The selected period.
+8. Measurement source and last successful synchronization.
+9. A ranking of all eligible cities.
+10. A clear explanation of how the result was calculated.
+
+Use PM2.5 as the primary ranking metric. Do not combine PM2.5 and PM10 into an arbitrary composite score.
+
+Explain that the result represents measured particulate concentrations, not a comprehensive air-quality or health assessment.
+
+Cities with insufficient data must not qualify as winners.
+
+# 2. Technology stack
+
+Use:
+
+- Laravel 12 or a newer stable version officially supported at implementation time.
+- PHP 8.4 or newer compatible stable version.
+- PostgreSQL.
+- Laravel Blade.
+- Plain HTML and minimal CSS.
+- Laravel HTTP Client.
+- Laravel Queue Jobs.
+- Laravel Scheduler.
+- Laravel Cache.
+- PHPUnit or Pest.
+- Docker Compose.
+- Redis only if justified.
+
+Do not introduce React, Vue, Angular, Livewire or complicated frontend frameworks.
+
+Prefer standard Laravel conventions and clean object-oriented PHP.
+
+Follow SOLID principles where appropriate.
+
+# 3. External measurement source
+
+Primary source:
+
+https://data.sensor.community/
+
+Candidate live endpoint:
+
+https://data.sensor.community/airrohr/v1/filter/country=BG&type=SDS011
+
+Historical archive:
+
+https://archive.sensor.community/
+
+SDS011 provides particulate measurements:
+
+- P1 = PM10.
+- P2 = PM2.5.
+
+Verify the actual endpoint response and available metadata before implementing the integration.
+
+Do not assume that every sensor returns valid readings.
+
+The application must use only real measurements.
+
+## Source investigation
+
+Before implementation:
+
+1. Verify current API endpoints.
+2. Verify JSON structure.
+3. Identify sensor IDs, location IDs, timestamps and coordinates.
+4. Verify archive formats and availability for at least 12 months.
+5. Verify data licensing, attribution requirements and permitted polling frequency.
+6. Implement appropriate rate limiting and request identification.
+7. Document the verified findings in `docs/DATA-SOURCES.md`.
+
+If the proposed endpoint is unsuitable, find a documented alternative or fallback with compatible licensing.
+
+Never silently replace real data with generated measurements.
+
+# 4. Data collection
+
+Implement automatic collection every 15 minutes using Laravel Scheduler.
+
+Example scheduled command:
+
+`php artisan air:collect`
+
+Requirements:
+
+- Fetch Bulgarian particulate sensor data.
+- Validate HTTP responses.
+- Parse JSON safely.
+- Extract PM2.5 and PM10.
+- Extract sensor ID, location ID, timestamp, latitude and longitude.
+- Reject invalid geographic coordinates.
+- Reject negative or non-finite measurements.
+- Flag suspicious readings using documented quality rules.
+- Use source measurement timestamps, not ingestion timestamps, for historical calculations.
+- Store raw measurements locally.
+- Prevent duplicates using database unique constraints.
+- Use batch inserts/upserts.
+- Use request timeouts.
+- Implement retries with exponential backoff for temporary failures.
+- Respect HTTP 429 and Retry-After.
+- Prevent concurrent collection runs using locking.
+- Log failures without crashing the application.
+- Record collection duration, processed count, inserted count, duplicates, invalid records and source status.
+
+One failed collection must not damage previously stored measurements.
+
+Do not assume that requesting the same live snapshot every 15 minutes yields exactly one new observation per sensor.
+
+# 5. Historical backfill
+
+The application must contain at least 12 months of real historical data.
+
+A newly deployed installation must be capable of downloading historical data instead of waiting 12 months.
+
+Implement:
+
+`php artisan air:backfill --months=12`
+
+Requirements:
+
+- Download historical measurements from Sensor.Community archives.
+- Support their actual published CSV or Parquet layout.
+- Process historical data in chunks or streams.
+- Avoid loading large archives entirely into PHP memory.
+- Be restartable.
+- Store progress and checkpoints.
+- Avoid duplicate measurements.
+- Retry failed archive downloads later.
+- Validate downloaded data.
+- Support interrupted imports.
+- Record source files, processing status and errors.
+- Allow importing a specific date range.
+
+Example:
+
+`php artisan air:backfill --from=2025-10-01 --to=2026-10-01`
+
+Do not claim that 12 months of history exist until the backfill has actually completed and coverage has been verified.
+
+The backfill must be practical for the full Bulgarian dataset, not just a few manually selected sensors.
+
+# 6. Bulgarian cities and geographic assignment
+
+Measurements contain coordinates, not necessarily trustworthy city names.
+
+Create a reliable local geographic dataset for Bulgarian settlements.
+
+Investigate suitable sources such as:
+
+- Official Bulgarian geographic or statistical datasets.
+- OpenStreetMap.
+- GeoNames.
+- Openly licensed administrative boundaries.
+
+Verify licensing and attribution.
+
+Store at minimum:
+
+**cities**
+- id
+- name_bg
+- name_en, when available
+- latitude
+- longitude
+- municipality
+- region
+- population, when available
+- external_identifier
+- geographic_source
+
+**sensors**
+- id
+- external_sensor_id
+- external_location_id
+- sensor_type
+- latitude
+- longitude
+- city_id
+- assignment_method
+- assignment_distance_km
+- first_seen_at
+- last_seen_at
+- is_active
+
+Prefer polygon-based settlement assignment when suitable settlement boundaries are available.
+
+Otherwise implement nearest-city assignment using the Haversine formula or PostGIS.
+
+Use a configurable maximum distance, initially 10 km, and document it.
+
+Do not assign a remote rural sensor to a city merely because that city is geographically nearest.
+
+Sensors that cannot be assigned confidently must remain unassigned.
+
+Handle sensors changing location over time. Historical measurements must preserve their correct geographic association.
+
+A coordinate located outside Bulgaria must not be accepted as a Bulgarian sensor solely because the API country filter returned it.
+
+# 7. Database architecture
+
+Design proper migrations and indexes.
+
+Expected entities:
+
+- cities
+- sensors
+- sensor_locations
+- measurements
+- sensor_daily_statistics
+- city_daily_statistics
+- collection_runs
+- import_batches
+- data_quality_events
+- archived_measurement_partitions
+
+Adjust the design if justified.
+
+Use appropriate numeric precision for concentrations and geographic coordinates.
+
+Use UTC internally.
+
+Convert dates correctly for reporting in the Europe/Sofia timezone.
+
+## Performance
+
+Historical queries must not scan every raw measurement.
+
+Implement daily aggregations and appropriate database indexes.
+
+Suggested flow:
+
+Raw measurements → Sensor daily statistics → City daily statistics → Historical ranking.
+
+Aggregation must preserve sample counts and temporal coverage.
+
+Avoid bias where sensors with more frequent reporting dominate the city average.
+
+For a city-period comparison, use a documented approach based on sensor-hour observations, sensor-day aggregates and city-day aggregates.
+
+Handle missing readings and irregular reporting.
+
+Never average precomputed daily averages blindly when they represent different numbers of valid observations, unless this weighting is an explicit methodological choice.
+
+Ensure that aggregation updates are idempotent and can be recomputed after late historical imports.
+
+# 8. Cleanest city calculation
+
+Implement a dedicated service, for example:
+
+`App\Services\AirQuality\CleanestCityService`
+
+Input:
+
+- date_from
+- date_to
+
+Output:
+
+- Winning city.
+- Average PM2.5.
+- Average PM10.
+- Days covered.
+- Number of contributing sensors.
+- Data coverage percentage.
+- Complete eligible ranking.
+- Excluded cities and reasons.
+- Source attribution.
+- Calculation methodology.
+
+Default qualification rules:
+
+- Minimum 75% valid calendar-day coverage.
+- Minimum 1 qualifying sensor.
+- Sensor-day and hourly completeness thresholds must be defined and documented.
+- Cities with no qualifying observations must be excluded.
+
+Avoid giving an artificial advantage to a city with only a few unusually clean measurements.
+
+For periods with a single day, use explicit hourly coverage criteria.
+
+When multiple cities tie, return all tied cities or use an explicitly documented deterministic tie-breaking rule.
+
+Implement the calculation using indexed local database data only.
+
+No external API calls are permitted during a user's historical search.
+
+# 9. Web UI
+
+Create a simple, professional and minimal Blade interface.
+
+Do not spend unnecessary effort on visual decoration.
+
+Main page:
+
+**Clean Air Finder — Bulgaria**
+
+Fields:
+
+- Date From — calendar
+- Date To — calendar
+- Find Cleanest Air — button
+
+After submitting, show:
+
+**Cleanest city**
+
+- City name.
+- Average PM2.5.
+- Average PM10.
+- Measurement period.
+- Number of sensors.
+- Data coverage.
+
+Then show a simple HTML table:
+
+| Rank | City | PM2.5 | PM10 | Sensors | Coverage |
+|------|------|-------|------|---------|----------|
+
+Provide a separate section explaining the methodology.
+
+Clearly distinguish measured data from estimates.
+
+If there is insufficient data, display an appropriate message instead of naming a winner.
+
+The calendar must prevent selecting dates outside the actually available local historical dataset.
+
+# 10. REST API
+
+Create versioned endpoints.
+
+Examples:
+
+`GET /api/v1/cities`
+
+`GET /api/v1/air-quality/cleanest?from=2026-01-01&to=2026-01-31`
+
+`GET /api/v1/air-quality/ranking?from=2026-01-01&to=2026-01-31`
+
+`GET /api/v1/air-quality/cities/{cityId}?from=2026-01-01&to=2026-01-31`
+
+`GET /api/v1/data-coverage`
+
+`GET /health/live`
+
+`GET /health/ready`
+
+Return structured JSON responses.
+
+Validate all query parameters.
+
+Use appropriate HTTP status codes.
+
+Handle:
+
+- Invalid date formats.
+- DateFrom after DateTo.
+- Future dates.
+- Dates outside stored history.
+- Empty datasets.
+- Insufficient coverage.
+- Unknown cities.
+- Internal service failures.
+
+Do not expose application secrets, stack traces or database credentials.
+
+# 11. Archiving
+
+Any raw measurement data older than 36 months must be archived to reduce active storage costs.
+
+Implement:
+
+`php artisan air:archive`
+
+Requirements:
+
+- Run automatically on a suitable schedule.
+- Archive measurements older than 36 months.
+- Prefer PostgreSQL time-based partitioning where justified.
+- Preserve daily aggregates where needed for historical reports.
+- Use compressed archive files or another justified low-cost storage format.
+- Preserve sufficient metadata to verify and restore archived records.
+- Verify archive integrity before removing active raw data.
+- Support restoring a selected archived period.
+- Make archival idempotent.
+- Never delete data because an export failed.
+
+Document whether historical queries older than 36 months are directly available or require restoration.
+
+# 12. Reliability
+
+The application must continue serving existing stored data when Sensor.Community is unavailable.
+
+Implement:
+
+- HTTP timeout configuration.
+- Limited retries.
+- Backoff.
+- Failure logging.
+- Collection checkpoints.
+- Database transaction boundaries.
+- Idempotent ingestion.
+- Duplicate protection.
+- Safe restart behavior.
+- Stale-data detection.
+- Explicit degraded state reporting.
+
+A source outage must not make the frontend unavailable.
+
+# 13. Observability
+
+Use Prometheus-compatible metrics and Grafana, or another appropriately justified observability platform.
+
+Monitor:
+
+- HTTP request count.
+- HTTP request duration.
+- Historical query duration.
+- Data collection success/failure.
+- Last successful collection.
+- Number of sensors.
+- Number of active sensors.
+- Number of valid measurements.
+- Invalid measurement percentage.
+- Import backlog.
+- Backfill progress.
+- Database health.
+- Data freshness.
+- Queue failures.
+- Archive failures.
+
+Provide meaningful health endpoints.
+
+Readiness checks must distinguish infrastructure health from data freshness.
+
+Add structured application logs.
+
+Create a minimal Grafana dashboard or equivalent configuration.
+
+Document alert thresholds for stale measurements and repeated collection failures.
+
+# 14. Performance testing
+
+Create realistic performance tests using reproducible synthetic datasets.
+
+Synthetic data may be used for automated tests and benchmarks only, never as production measurement data.
+
+Test dataset sizes:
+
+- 100,000 measurements.
+- 1,000,000 measurements.
+- 10,000,000 measurements, if local resources permit.
+
+Test date ranges:
+
+- 1 day.
+- 7 days.
+- 30 days.
+- 365 days.
+
+Measure:
+
+- Query latency.
+- Database execution plan.
+- Index usage.
+- Memory usage.
+- Aggregation duration.
+- Backfill throughput.
+
+Use EXPLAIN ANALYZE for representative PostgreSQL queries.
+
+Document actual measurements, hardware conditions and dataset sizes.
+
+Do not invent benchmark results.
+
+If a benchmark cannot run, mark it as not executed.
+
+# 15. Automated tests
+
+Implement unit, feature and integration tests.
+
+Required scenarios:
+
+1. Correct PM2.5/PM10 extraction.
+2. Valid sensor coordinates.
+3. Invalid coordinates.
+4. Missing fields.
+5. Negative values.
+6. Invalid numeric measurements.
+7. Duplicate sensor measurements.
+8. Repeated collection runs.
+9. HTTP timeout.
+10. HTTP 429.
+11. Invalid JSON.
+12. Historical backfill interruption and resume.
+13. Sensor changes location.
+14. Nearest-city distance threshold.
+15. City with no measurements.
+16. City with insufficient coverage.
+17. Correct city ranking.
+18. Equal ranking values.
+19. Date range validation.
+20. Missing daily observations.
+21. Daily aggregation recalculation.
+22. Archive failure and recovery.
+23. Source unavailable but local queries still function.
+24. Valid JSON API responses.
+25. Real-data provenance and attribution.
+
+External HTTP calls must be mocked in automated tests.
+
+# 16. Deployment
+
+Provide Docker Compose configuration for the complete application.
+
+Include:
+
+- Laravel application.
+- PostgreSQL.
+- Web server.
+- Scheduler.
+- Queue worker, if required.
+- Monitoring services or an optional monitoring profile.
+
+Provide `.env.example`.
+
+Use persistent database storage.
+
+Implement service health checks.
+
+Avoid embedding production passwords.
+
+Document backup and restoration.
+
+Provide one documented command to start the complete stack, including required initial setup.
+
+A clean deployment must be reproducible.
+
+Data initialization and 12-month backfill must be documented clearly, including the time necessary to reach a ready-to-query state.
+
+# 17. Documentation
+
+Create:
+
+`README.md`
+
+`docs/ARCHITECTURE.md`
+
+`docs/DATA-SOURCES.md`
+
+`docs/DATA-METHODOLOGY.md`
+
+`docs/DATABASE.md`
+
+`docs/API.md`
+
+`docs/DEPLOYMENT.md`
+
+`docs/OBSERVABILITY.md`
+
+`docs/PERFORMANCE.md`
+
+`docs/OPERATIONS.md`
+
+Explain all architectural choices.
+
+Include operational instructions for an on-call engineer.
+
+Explain how to recover from:
+
+- Source downtime.
+- Database failure.
+- Corrupted archive download.
+- Missed collection runs.
+- Failed daily aggregations.
+- Incomplete historical backfill.
+
+# 18. Implementation workflow
+
+Follow these stages:
+
+**Stage 1 — Research and validation**
+
+Validate the real data sources, formats, licenses and availability.
+
+**Stage 2 — Architecture**
+
+Design the database, geographic assignment and statistical methodology.
+
+**Stage 3 — Backend**
+
+Implement Laravel services, migrations, validation and APIs.
+
+**Stage 4 — Collection and backfill**
+
+Implement live ingestion, historical imports, retries and checkpoints.
+
+**Stage 5 — Aggregation**
+
+Implement sensor/city statistics, coverage rules and rankings.
+
+**Stage 6 — Frontend**
+
+Implement the minimal Blade interface.
+
+**Stage 7 — Operations**
+
+Implement scheduling, archiving, observability and Docker deployment.
+
+**Stage 8 — Validation**
+
+Run automated tests, inspect database performance, validate real data and verify deployment.
+
+Do not claim a stage is complete unless its acceptance checks have succeeded.
+
+# 19. Git workflow
+
+If an existing repository is available:
+
+1. Inspect its current state.
+2. Do not overwrite unrelated work.
+3. Create a dedicated feature branch named `feature/clean-air-finder`.
+4. Commit changes in logical stages.
+5. Do not push, merge or modify `main` unless explicitly authorized.
+
+If starting from an empty directory, initialize a new Laravel application and Git repository.
+
+# 20. Acceptance criteria
+
+The implementation is complete only when:
+
+- Laravel starts successfully.
+- PostgreSQL migrations pass.
+- Real Bulgarian sensors are imported.
+- Historical backfill supports at least 12 months.
+- Collection runs automatically every 15 minutes.
+- A valid date range can be selected through the UI.
+- The application calculates the cleanest eligible Bulgarian city using locally stored data.
+- City ranking and data coverage are displayed.
+- Invalid requests return useful errors.
+- Source outages do not break historical queries.
+- Archiving is implemented and tested.
+- Health checks and metrics work.
+- Performance is measured and documented.
+- All automated tests pass, or remaining failures are explicitly documented.
+- Deployment is reproducible.
+- A final technical report is produced.
+
+## Final report
+
+When finished, provide:
+
+1. Implemented functionality.
+2. External sources and verified licenses.
+3. Database architecture.
+4. Geographic matching methodology.
+5. Statistical ranking methodology.
+6. Historical data coverage achieved.
+7. Real-world collection results.
+8. Test results.
+9. Actual performance measurements.
+10. Deployment commands.
+11. Known limitations.
+12. Git commits and changed files.
+
+**Important:** This assignment evaluates engineering judgment as much as implementation. Favor correctness, reproducibility, data quality and operational reliability over unnecessary features. Never fabricate measurements or benchmark results.

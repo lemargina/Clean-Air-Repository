@@ -1,0 +1,14 @@
+{
+  "measured_free_disk_bytes": 39379255296,
+  "source_sensor_days": 247184,
+  "assumed_samples_per_full_sensor_day": 593,
+  "assumed_bytes_per_raw_record_including_longer_source_uri": 231.2001971,
+  "estimated_raw_database_bytes": 33889350785,
+  "largest_verified_zip_bytes": 3870027552,
+  "reserved_wal_and_free_space_bytes": 10737418240,
+  "estimated_required_bytes": 48496796577,
+  "is_estimate_not_completed_import": true,
+  "capacity_shortfall_bytes": 9117541281,
+  "free_disk_after_benchmark_database_cleanup_bytes": 41278332928,
+  "remaining_estimated_capacity_shortfall_bytes": 7218463649
+}

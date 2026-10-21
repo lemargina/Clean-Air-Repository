@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-20",
+  "timezone": "Europe/Sofia",
+  "os": "Linux-6.12.113+deb13-amd64-x86_64-with-glibc2.41",
+  "cpu_model": "AMD Ryzen 7 8845HS w/ Radeon 780M Graphics",
+  "logical_cpu_count": 16,
+  "memory": "MemTotal:       30603492 kB",
+  "free_disk_bytes": 39449858048,
+  "benchmark_environment": "PostgreSQL 17 Alpine container, PHP 8.4.26 CLI on host, same NVMe filesystem; other development and monitoring workloads running; not isolated hardware"
+}

@@ -1,0 +1,10 @@
+.env
+.git
+vendor
+node_modules
+storage/research
+storage/app
+storage/logs/*
+bootstrap/cache/*.php
+database/*.sqlite
+*.pdf
