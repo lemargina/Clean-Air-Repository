@@ -1,0 +1,22 @@
+AI agents were used as development assistants during the creation of Clean Air Finder Bulgaria.
+
+During planning, AI agents helped turn the project brief into an implementation plan covering the backend, data collection, interface, operations, and validation.
+
+Research support from AI agents helped document the Sensor.Community measurement source and related geographic data sources.
+
+For the backend, AI agents helped design the Laravel application structure and PostgreSQL schema for measurements, locations, and import progress.
+
+Implementation assistance included services for parsing measurements, collecting current data, and importing historical archives.
+
+The agents also helped develop city assignment, daily aggregation, coverage checks, and cleanest-city ranking logic.
+
+On the frontend, AI assisted with building the Blade interface and HTTP endpoints for viewing air quality results.
+
+Testing support included preparing automated tests and fixtures for measurement parsing, geographic matching, and reporting behavior.
+
+
+AI agents also assisted with Docker Compose, startup scripts, scheduled jobs, and queue worker configuration.
+For project documentation, AI helped describe the API, data methodology, architecture, deployment, operations, and monitoring.
+Finally, AI agents helped organize implementation work into reviewable stages and propose logical commit groupings.
+AI-generated suggestions and code were intended to be reviewed and validated by a human, especially for real data behavior and operational claims.
+AI assistance does not mean that historical data imports, benchmarks, or production deployment were automatically completed.
