@@ -76,7 +76,7 @@ class BackfillService
                             fclose($stream);
                         }
                     }
-                    // Checkpoint only after an entire member commits. Interrupted members replay safely.
+
                     DB::table('import_batches')->where('id', $batch->id)->update(['checkpoint' => $i + 1, 'row_checkpoint' => 0, 'updated_at' => now()]);
                 }
                 $zip->close();
@@ -130,7 +130,7 @@ class BackfillService
             if ($r['sensor_type'] !== 'SDS011') {
                 continue;
             }
-            // Cheap bounding box prefilter before full polygon and timestamp validation.
+
             if (! is_numeric($r['lat']) || ! is_numeric($r['lon']) || $r['lat'] < 41 || $r['lat'] > 45 || $r['lon'] < 22 || $r['lon'] > 29) {
                 continue;
             }

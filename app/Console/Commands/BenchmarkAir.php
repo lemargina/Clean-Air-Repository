@@ -59,7 +59,7 @@ class BenchmarkAir extends Command
             $results[$days] = ['latency_ms' => $timings, 'plan' => json_decode($plan[0]->{'QUERY PLAN'}, true)];
         }
         $plan = DB::select("EXPLAIN (ANALYZE,BUFFERS,FORMAT JSON) SELECT sensor_id,AVG(pm25) FROM measurements WHERE local_date='2025-06-01' AND is_suspicious=false GROUP BY sensor_id");
-        // Parser + real ingestion service throughput on synthetic CSV, never production.
+
         $stream = fopen('php://temp/maxmemory:1048576', 'w+');
         fwrite($stream, "sensor_id;sensor_type;location;lat;lon;timestamp;P1;P2\n");
         for ($i = 0; $i < 5000; $i++) {

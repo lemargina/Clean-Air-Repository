@@ -11,7 +11,7 @@ class Metrics
         try {
             DB::table('metric_counters')->insertOrIgnore(['name' => $name, 'value' => 0]);
             DB::table('metric_counters')->where('name', $name)->increment('value', $value);
-        } catch (\Throwable) { /* Observability must not break responses. */
+        } catch (\Throwable) {
         }
     }
 

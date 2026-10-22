@@ -66,7 +66,7 @@ return $in;
                 $distance = $d;
             }
         }
-        // Conservative radius: small towns 2km, larger cities up to configured 10km.
+
         $radius = $best ? min(config('air.max_distance_km'), max(2, sqrt(($best->population ?? 0) / 10000))) : 0;
 
         return ['city_id' => $distance <= $radius ? $best->id : null, 'assignment_method' => $distance <= $radius ? 'nearest_city_conservative' : 'unassigned', 'assignment_distance_km' => is_finite($distance) ? round($distance,4) : null];

@@ -40,7 +40,7 @@ return $count;
         }$path = $dir.'/'.$from->format('Y-m').'.jsonl.gz';
         $temp = $path.'.partial';
         $range = fn () => DB::table('measurements')->where('measured_at', '>=', $from)->where('measured_at', '<', $from->addMonth());
-        // Never overwrite an earlier successful archive with a late partial import.
+
         $existing = DB::table('archived_measurement_partitions')->where('month', $from->toDateString())->first();
         if ($existing && $existing->status === 'archived') {
             if ($range()->exists()) {
